@@ -13,7 +13,6 @@ const theme = createTheme({
     tertiary: '#f4f5fc',
     quaternary: '#eaeef4',
     quinary: '#dbe1ef',
-    main: '#d8dae5',
   },
 });
 
