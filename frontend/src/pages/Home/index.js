@@ -55,7 +55,7 @@ const Home = () => {
       </Box>
       <Box display="flex" justifyContent="flex-end">
         <Box
-          width="350px"
+          width="250px"
           maxWidth="90vw"
           p={1.5}
           bgcolor="white"
@@ -68,7 +68,7 @@ const Home = () => {
             src="/images/avatar.jpeg"
             alt="avatar"
             style={{
-              width: 50,
+              width: 40,
               aspectRatio: '1/1',
               borderRadius: '50%',
               objectFit: 'cover',
@@ -76,8 +76,10 @@ const Home = () => {
             }}
           />
           <Box flex={1}>
-            <Typography fontWeight={600}>hungdevjs</Typography>
-            <Typography fontSize="12px" color="#888">
+            <Typography fontSize="12px" fontWeight={600}>
+              hungdevjs
+            </Typography>
+            <Typography fontSize="10px" color="#555">
               Fullstack engineer
             </Typography>
           </Box>
@@ -92,7 +94,7 @@ const Home = () => {
               }}
               onClick={() => window.open('https://hungdevjs.web.app')}
             >
-              <Typography fontSize="12px" fontWeight={600} color="white">
+              <Typography fontSize="10px" fontWeight={600} color="white">
                 Follow
               </Typography>
             </Box>
