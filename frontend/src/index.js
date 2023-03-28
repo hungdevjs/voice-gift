@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import './styles/main.scss';
 import App from './App';
+import { AppContextProvider } from './contexts/app.context';
 
 const theme = createTheme({
   colors: {
@@ -21,7 +22,9 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <ThemeProvider theme={theme}>
-        <App />
+        <AppContextProvider>
+          <App />
+        </AppContextProvider>
       </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>

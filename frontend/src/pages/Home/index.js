@@ -1,6 +1,8 @@
-import { Box, Button, Typography, useTheme } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Box, Typography, useTheme } from '@mui/material';
 
 const Home = () => {
+  const navigate = useNavigate();
   const { colors } = useTheme();
 
   return (
@@ -47,6 +49,7 @@ const Home = () => {
             transition: 'all ease 0.3s',
             '&:hover': { transform: 'scale(1.05)' },
           }}
+          onClick={() => navigate('/voice-gifts/create')}
         >
           <Typography fontWeight={600} color="white">
             Create gift
