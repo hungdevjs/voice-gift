@@ -4,8 +4,8 @@ export const create = async (req, res) => {
   try {
     const { avatar, record } = req.files;
     const data = {
-      avatar: avatar[0],
-      record: record[0],
+      avatar: avatar?.[0],
+      record: record?.[0],
       ...req.body,
     };
     const id = await service.create(data);
