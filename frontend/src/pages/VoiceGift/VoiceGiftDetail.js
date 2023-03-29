@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useId } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   alpha,
   Box,
@@ -6,6 +7,8 @@ import {
   Container,
   Grid,
   Typography,
+  Dialog,
+  CircularProgress,
   useTheme,
 } from '@mui/material';
 import { DeviceFrameset } from 'react-device-frameset';
@@ -13,13 +16,18 @@ import { faker } from '@faker-js/faker';
 import ScrollContainer from 'react-indiana-drag-scroll';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
+import CheckIcon from '@mui/icons-material/Check';
 import { AudioRecorder, useAudioRecorder } from 'react-audio-voice-recorder';
+import { useSnackbar } from 'notistack';
 
 import Input from './components/Input';
 import useAppContext from '../../hooks/useAppContext';
 import useResponsive from '../../hooks/useReponsive';
+import { create } from '../../services/voiceGift.service';
 
 const VoiceGiftDetail = () => {
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const recorderControls = useAudioRecorder();
   const { isMobile } = useResponsive();
   const theme = useTheme();
@@ -27,6 +35,7 @@ const VoiceGiftDetail = () => {
     freeBackgroundState: { backgrounds },
     freeMusicState: { musics },
   } = useAppContext();
+  const [loaded, setLoaded] = useState([]);
   const [avatar, setAvatar] = useState(faker.image.avatar());
   const [title, setTitle] = useState('I wish you a merry Christmas!');
   const [name, setName] = useState(faker.name.firstName());
@@ -41,6 +50,7 @@ const VoiceGiftDetail = () => {
   });
   const [audioBlob, setAudioBlob] = useState(null);
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const inputId = useId();
   const labelRef = useRef();
 
@@ -163,6 +173,39 @@ const VoiceGiftDetail = () => {
     }
   }, [isPlayingPreview]);
 
+  const submit = async () => {
+    setIsLoading(true);
+    try {
+      if (!name || !name.trim()) throw new Error('Name is empty');
+      if (!title || !title.trim()) throw new Error('Name is empty');
+      if (!text || !text.trim()) throw new Error('Name is empty');
+
+      const formData = new FormData();
+      if (audioBlob) {
+        const record = new File([audioBlob], 'record', {
+          type: audioBlob.type,
+        });
+        formData.append('record', record, 'record');
+      }
+
+      if (typeof avatar !== 'string') {
+        formData.append('avatar', avatar, 'avatar');
+      }
+
+      formData.append('name', name);
+      formData.append('title', title);
+      formData.append('text', text);
+      formData.append('backgroundId', backgroundId);
+      formData.append('audioId', audioId);
+
+      const res = await create(formData);
+      navigate(`/voice-gifts/${res.data}/qr`);
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: 'error' });
+    }
+    setIsLoading(false);
+  };
+
   return (
     <Box>
       <label htmlFor={inputId} ref={labelRef} style={{ display: 'none' }} />
@@ -173,7 +216,50 @@ const VoiceGiftDetail = () => {
         accept="image/*"
         onChange={handleInputChange}
       />
-      <Container>
+      <Box
+        height="50px"
+        px={2}
+        sx={{ borderBottom: '1px solid #ccc' }}
+        display="flex"
+        alignItems="center"
+        justifyContent="flex-end"
+        position="fixed"
+        left={0}
+        top={0}
+        width="100vw"
+        bgcolor="white"
+        zIndex={99}
+      >
+        <Button
+          variant="contained"
+          color="success"
+          size="small"
+          onClick={submit}
+        >
+          <CheckIcon sx={{ fontSize: '20px', mr: 1 }} />
+          <Typography fontSize="12px" textTransform="none">
+            Done
+          </Typography>
+        </Button>
+      </Box>
+      <Dialog open={isLoading} fullScreen>
+        <Box
+          p={2}
+          height="100%"
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          gap={2}
+        >
+          <Box>
+            <Typography align="center">Creating voice gift...</Typography>
+            <Typography align="center">Please don't close browser.</Typography>
+          </Box>
+          <CircularProgress color="primary" size={30} />
+        </Box>
+      </Dialog>
+      <Container sx={{ mt: '50px' }}>
         <Grid container>
           <Grid item xs={12} md={6}>
             <Box p={2} display="flex" flexDirection="column" gap={1}>
@@ -259,7 +345,7 @@ const VoiceGiftDetail = () => {
                     overflowX: 'auto',
                   }}
                 >
-                  {backgrounds.map((item) => (
+                  {backgrounds.map((item, index) => (
                     <img
                       key={item.id}
                       src={item.url}
@@ -276,8 +362,17 @@ const VoiceGiftDetail = () => {
                             : 'transparent'
                         }`,
                         cursor: 'pointer',
+                        transition: 'all ease 0.3s',
+                        opacity: loaded[index] ? 1 : 0,
                       }}
                       onClick={() => setBackgroundId(item.id)}
+                      onLoad={() =>
+                        setLoaded((prevLoaded) => {
+                          const nextLoaded = [...prevLoaded];
+                          nextLoaded[index] = true;
+                          return nextLoaded;
+                        })
+                      }
                     />
                   ))}
                 </ScrollContainer>

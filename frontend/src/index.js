@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
+import { SnackbarProvider } from 'notistack';
 
 import './styles/main.scss';
 import App from './App';
@@ -20,12 +21,20 @@ const theme = createTheme({
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <AppContextProvider>
-          <App />
-        </AppContextProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <SnackbarProvider
+      maxSnack={3}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left',
+      }}
+    >
+      <BrowserRouter>
+        <ThemeProvider theme={theme}>
+          <AppContextProvider>
+            <App />
+          </AppContextProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </SnackbarProvider>
   </React.StrictMode>
 );
