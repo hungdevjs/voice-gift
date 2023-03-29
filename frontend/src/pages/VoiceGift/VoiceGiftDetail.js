@@ -40,6 +40,7 @@ const VoiceGiftDetail = () => {
     isPlaying: false,
   });
   const [audioBlob, setAudioBlob] = useState(null);
+  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const inputId = useId();
   const labelRef = useRef();
 
@@ -55,6 +56,7 @@ const VoiceGiftDetail = () => {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
         }
+
         audioRef.current = new Audio(activeAudioItem.url);
         audioRef.current.play();
         audioRef.current.addEventListener('ended', () => {
@@ -69,6 +71,9 @@ const VoiceGiftDetail = () => {
           audioRef.current.currentTime = 0;
         }
       }
+    } else {
+      audioRef.current?.pause();
+      audioRef.current && (audioRef.current.currentTime = 0);
     }
   }, [activeAudio]);
 
@@ -97,6 +102,66 @@ const VoiceGiftDetail = () => {
       recorderControls.stopRecording();
     }
   }, [recorderControls.recordingTime]);
+
+  const togglePlayingPreview = () => {
+    setIsPlayingPreview(!isPlayingPreview);
+  };
+
+  const previewRecordRef = useRef();
+  const previewAudioRef = useRef();
+  useEffect(() => {
+    if (isPlayingPreview) {
+      setActiveAudio({ id: null, isPlaying: false });
+      recorderAudioRef.current?.pause();
+      recorderAudioRef.current && (recorderAudioRef.current.currentTime = 0);
+
+      if (previewAudioRef.current) {
+        previewAudioRef.current.pause();
+        previewAudioRef.current = null;
+      }
+
+      if (previewRecordRef.current) {
+        previewRecordRef.current.pause();
+        previewRecordRef.current = null;
+      }
+
+      const audio = musics.find((item) => item.id === audioId);
+      if (audio) {
+        previewAudioRef.current = new Audio(audio.url);
+        previewAudioRef.current.volume = 0.1;
+      }
+
+      if (audioBlob) {
+        previewRecordRef.current = new Audio(URL.createObjectURL(audioBlob));
+      }
+
+      if (previewAudioRef.current) {
+        previewAudioRef.current.play();
+        previewAudioRef.current.addEventListener('ended', () => {
+          previewRecordRef.current?.pause();
+          setIsPlayingPreview(false);
+        });
+      }
+
+      if (previewRecordRef.current) {
+        previewRecordRef.current.play();
+        previewRecordRef.current.addEventListener('ended', () => {
+          previewAudioRef.current?.pause();
+          setIsPlayingPreview(false);
+        });
+      }
+    } else {
+      if (previewAudioRef.current) {
+        previewAudioRef.current.pause();
+        previewAudioRef.current = null;
+      }
+
+      if (previewRecordRef.current) {
+        previewRecordRef.current.pause();
+        previewRecordRef.current = null;
+      }
+    }
+  }, [isPlayingPreview]);
 
   return (
     <Box>
@@ -250,6 +315,9 @@ const VoiceGiftDetail = () => {
                       <Typography fontWeight={600} align="center">
                         {item.name}
                       </Typography>
+                      <Typography fontWeight={600} align="center">
+                        ({item.length}s)
+                      </Typography>
                       <Box display="flex" justifyContent="center">
                         <Box
                           sx={{ cursor: 'pointer' }}
@@ -371,15 +439,20 @@ const VoiceGiftDetail = () => {
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
-                        bgcolor={alpha('#000', 0.3)}
+                        bgcolor={
+                          isPlayingPreview ? 'transparent' : alpha('#000', 0.3)
+                        }
+                        sx={{ cursor: 'pointer' }}
+                        onClick={togglePlayingPreview}
                       >
-                        <PlayCircleIcon
-                          sx={{
-                            cursor: 'pointer',
-                            color: 'white',
-                            fontSize: '40px',
-                          }}
-                        />
+                        {!isPlayingPreview && (
+                          <PlayCircleIcon
+                            sx={{
+                              color: 'white',
+                              fontSize: '40px',
+                            }}
+                          />
+                        )}
                       </Box>
                     </Box>
                   </Box>
