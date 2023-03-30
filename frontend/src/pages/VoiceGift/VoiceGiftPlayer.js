@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Box,
@@ -8,6 +8,7 @@ import {
   useTheme,
 } from '@mui/material';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
+import { faker } from '@faker-js/faker';
 
 import { get } from '../../services/voiceGift.service';
 import useAppContext from '../../hooks/useAppContext';
@@ -101,6 +102,11 @@ const VoiceGiftPlayer = () => {
     }
   }, [isPlaying]);
 
+  const renderedAvatar = useMemo(
+    () => avatar || faker.internet.avatar(),
+    [avatar]
+  );
+
   if (!data)
     return (
       <Box
@@ -128,7 +134,7 @@ const VoiceGiftPlayer = () => {
         <Box display="flex" flexDirection="column" gap={2}>
           <Box display="flex" alignItems="center" gap={1}>
             <img
-              src={avatar}
+              src={renderedAvatar}
               alt="avatar"
               style={{
                 width: '25%',
@@ -191,8 +197,10 @@ const VoiceGiftPlayer = () => {
         width="100%"
         p={2}
         display="flex"
+        flexDirection="column"
         alignItems="center"
         justifyContent="center"
+        gap={1}
         sx={{ borderTop: '1px solid #ccc' }}
       >
         <Typography
@@ -204,6 +212,7 @@ const VoiceGiftPlayer = () => {
         >
           Create your voice gift back for them now!
         </Typography>
+        <img src="/images/logo.png" alt="logo" style={{ width: 30 }} />
       </Box>
     </Box>
   );

@@ -17,6 +17,8 @@ import ScrollContainer from 'react-indiana-drag-scroll';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import CheckIcon from '@mui/icons-material/Check';
+import KeyboardIcon from '@mui/icons-material/Keyboard';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { AudioRecorder, useAudioRecorder } from 'react-audio-voice-recorder';
 import { useSnackbar } from 'notistack';
 
@@ -222,7 +224,7 @@ const VoiceGiftDetail = () => {
         sx={{ borderBottom: '1px solid #ccc' }}
         display="flex"
         alignItems="center"
-        justifyContent="flex-end"
+        justifyContent="space-between"
         position="fixed"
         left={0}
         top={0}
@@ -230,11 +232,26 @@ const VoiceGiftDetail = () => {
         bgcolor="white"
         zIndex={99}
       >
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={1}
+          sx={{ cursor: 'pointer' }}
+          onClick={() => navigate('/')}
+        >
+          <img
+            src="/images/logo.png"
+            alt="logo"
+            style={{ maxHeight: '40px' }}
+          />
+          <Typography fontWeight={700}>VoiceGift</Typography>
+        </Box>
         <Button
           variant="contained"
           color="success"
           size="small"
           onClick={submit}
+          sx={{ borderRadius: 4 }}
         >
           <CheckIcon sx={{ fontSize: '20px', mr: 1 }} />
           <Typography fontSize="12px" textTransform="none">
@@ -262,7 +279,13 @@ const VoiceGiftDetail = () => {
       <Container sx={{ mt: '50px' }}>
         <Grid container>
           <Grid item xs={12} md={6}>
-            <Box p={2} display="flex" flexDirection="column" gap={1}>
+            <Box
+              p={isMobile ? 0 : 2}
+              py={2}
+              display="flex"
+              flexDirection="column"
+              gap={1}
+            >
               <Box display="flex" alignItems="center" gap={2}>
                 <Box
                   position="relative"
@@ -317,6 +340,9 @@ const VoiceGiftDetail = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
+                  <Typography fontSize="12px" fontStyle="italic" color="tomato">
+                    *Your avatar will be randomly chosen if you don't change it
+                  </Typography>
                 </Box>
               </Box>
               <Box>
@@ -476,7 +502,8 @@ const VoiceGiftDetail = () => {
           <Grid item xs={12} md={6}>
             <Box
               height="100%"
-              p={2}
+              p={isMobile ? 0 : 2}
+              py={2}
               display="flex"
               flexDirection="column"
               alignItems="center"
@@ -557,6 +584,25 @@ const VoiceGiftDetail = () => {
           </Grid>
         </Grid>
       </Container>
+      <Box
+        height="50px"
+        px={2}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        width="100vw"
+        bgcolor="white"
+        sx={{ borderTop: '1px solid #ccc', fontSize: '12px' }}
+      >
+        Made by hungdevjs with
+        <KeyboardIcon
+          sx={{ color: theme.palette.primary.main, mx: 0.5, fontSize: 18 }}
+        />{' '}
+        and
+        <FavoriteIcon
+          sx={{ color: theme.colors.primary, mx: 0.5, fontSize: 18 }}
+        />
+      </Box>
     </Box>
   );
 };
