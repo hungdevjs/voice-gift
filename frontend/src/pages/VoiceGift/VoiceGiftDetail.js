@@ -26,6 +26,7 @@ import Input from './components/Input';
 import useAppContext from '../../hooks/useAppContext';
 import useResponsive from '../../hooks/useReponsive';
 import { create } from '../../services/voiceGift.service';
+import { uploadFile } from '../../services/firebase.service';
 
 const VoiceGiftDetail = () => {
   const navigate = useNavigate();
@@ -182,25 +183,29 @@ const VoiceGiftDetail = () => {
       if (!title || !title.trim()) throw new Error('Name is empty');
       if (!text || !text.trim()) throw new Error('Name is empty');
 
-      const formData = new FormData();
+      const data = {
+        name,
+        title,
+        text,
+        backgroundId,
+        audioId,
+      };
+
       if (audioBlob) {
-        const record = new File([audioBlob], 'record', {
+        const recordFile = new File([audioBlob], 'record', {
           type: audioBlob.type,
         });
-        formData.append('record', record, 'record');
+
+        const record = await uploadFile(recordFile);
+        data.record = record;
       }
 
       if (typeof avatar !== 'string') {
-        formData.append('avatar', avatar, 'avatar');
+        const avatarRef = await uploadFile(avatar);
+        data.avatar = avatarRef;
       }
 
-      formData.append('name', name);
-      formData.append('title', title);
-      formData.append('text', text);
-      formData.append('backgroundId', backgroundId);
-      formData.append('audioId', audioId);
-
-      const res = await create(formData);
+      const res = await create(data);
       navigate(`/voice-gifts/${res.data}/qr`);
     } catch (err) {
       enqueueSnackbar(err.message, { variant: 'error' });

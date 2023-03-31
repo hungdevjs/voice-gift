@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
 import environments from '../utils/environments';
 
@@ -26,3 +28,7 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const firestore = getFirestore(app);
+export const storage = getStorage(app);
+export const functions = getFunctions(app);
+
+// connectFunctionsEmulator(functions, 'localhost', 5001);

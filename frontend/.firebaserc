@@ -1,0 +1,22 @@
+{
+  "projects": {
+    "default": "voicegif"
+  },
+  "targets": {
+    "personal-brand-b19ef": {
+      "hosting": {
+        "default": [
+          "voicegift"
+        ]
+      }
+    },
+    "voicegif": {
+      "hosting": {
+        "default": [
+          "voicegift"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

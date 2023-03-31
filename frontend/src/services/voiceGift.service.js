@@ -1,5 +1,8 @@
-import { api, apiUpload } from './api';
+import {
+  create as createVoiceGift,
+  get as getVoiceGift,
+} from './firebase.service';
 
-export const create = (formData) => apiUpload.post('/v1/voice-gifts', formData);
+export const create = (data) => createVoiceGift(data);
 
-export const get = (id) => api.get(`/v1/voice-gifts/${id}`);
+export const get = (id) => getVoiceGift({ id });
