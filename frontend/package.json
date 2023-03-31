@@ -30,7 +30,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "serve": "serve build"
+    "deploy-functions": "firebase use voicegif && firebase deploy --only functions",
+    "deploy-web": "yarn build && firebase use voicegif && firebase deploy --only hosting",
+    "deploy-both": "yarn deploy-functions && yarn deploy-web"
   },
   "eslintConfig": {
     "extends": [

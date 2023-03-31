@@ -29,6 +29,8 @@ import useRecorder from '../../hooks/useRecorder';
 import { create } from '../../services/voiceGift.service';
 import { uploadFile } from '../../services/firebase.service';
 
+const MAX_FILE_SIZE = 5242880;
+
 const VoiceGiftDetail = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -91,7 +93,13 @@ const VoiceGiftDetail = () => {
   }, [activeAudio]);
 
   const handleInputChange = (e) => {
-    setAvatar(e.target.files[0]);
+    try {
+      const file = e.target.files[0];
+      if (file.size > MAX_FILE_SIZE) throw new Error('Max file size is 5MB');
+      setAvatar(file);
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: 'error' });
+    }
     e.target.value = '';
   };
 
