@@ -23,6 +23,7 @@ const VoiceGiftPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState(null);
+  const [loaded, setLoaded] = useState([]);
 
   const { name, title, text, audioId, backgroundId, avatar, record } =
     data || {};
@@ -136,12 +137,21 @@ const VoiceGiftPlayer = () => {
             <img
               src={renderedAvatar}
               alt="avatar"
+              onLoad={() =>
+                setLoaded((prevLoaded) => {
+                  const nextLoaded = [...prevLoaded];
+                  nextLoaded[0] = true;
+                  return nextLoaded;
+                })
+              }
               style={{
                 width: '25%',
                 aspectRatio: '1/1',
                 objectFit: 'cover',
                 objectPosition: 'center',
                 borderRadius: '50%',
+                opacity: loaded[0] ? 1 : 0,
+                transition: 'all ease 0.3s',
               }}
             />
             <Box>
@@ -166,7 +176,19 @@ const VoiceGiftPlayer = () => {
             <img
               src={background?.url}
               alt="background"
-              style={{ display: 'block', width: '100%' }}
+              onLoad={() =>
+                setLoaded((prevLoaded) => {
+                  const nextLoaded = [...prevLoaded];
+                  nextLoaded[1] = true;
+                  return nextLoaded;
+                })
+              }
+              style={{
+                display: 'block',
+                width: '100%',
+                opacity: loaded[1] ? 1 : 0,
+                transition: 'all ease 0.3s',
+              }}
             />
             <Box
               position="absolute"
