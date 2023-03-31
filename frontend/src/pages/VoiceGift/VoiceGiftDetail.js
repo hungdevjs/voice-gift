@@ -19,19 +19,20 @@ import StopCircleIcon from '@mui/icons-material/StopCircle';
 import CheckIcon from '@mui/icons-material/Check';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import { AudioRecorder, useAudioRecorder } from 'react-audio-voice-recorder';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { useSnackbar } from 'notistack';
 
 import Input from './components/Input';
 import useAppContext from '../../hooks/useAppContext';
 import useResponsive from '../../hooks/useReponsive';
+import useRecorder from '../../hooks/useRecorder';
 import { create } from '../../services/voiceGift.service';
 import { uploadFile } from '../../services/firebase.service';
 
 const VoiceGiftDetail = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const recorderControls = useAudioRecorder();
+  const { isRecording, recordingTime, start, stop, recordFile } = useRecorder();
   const { isMobile } = useResponsive();
   const theme = useTheme();
   const {
@@ -51,7 +52,6 @@ const VoiceGiftDetail = () => {
     id: null,
     isPlaying: false,
   });
-  const [audioBlob, setAudioBlob] = useState(null);
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const inputId = useId();
@@ -100,22 +100,6 @@ const VoiceGiftDetail = () => {
     ? { borderRadius: 4, border: '1px solid #ccc' }
     : { device: 'iPhone X', color: 'gold' };
 
-  const addAudioElement = (blob) => {
-    setAudioBlob(blob);
-  };
-
-  useEffect(() => {
-    if (recorderControls.isRecording) {
-      setAudioBlob(null);
-    }
-  }, [recorderControls.isRecording]);
-
-  useEffect(() => {
-    if (recorderControls.recordingTime >= 30) {
-      recorderControls.stopRecording();
-    }
-  }, [recorderControls.recordingTime]);
-
   const togglePlayingPreview = () => {
     setIsPlayingPreview(!isPlayingPreview);
   };
@@ -144,8 +128,8 @@ const VoiceGiftDetail = () => {
         previewAudioRef.current.volume = 0.1;
       }
 
-      if (audioBlob) {
-        previewRecordRef.current = new Audio(URL.createObjectURL(audioBlob));
+      if (recordFile) {
+        previewRecordRef.current = new Audio(URL.createObjectURL(recordFile));
       }
 
       if (previewAudioRef.current) {
@@ -191,11 +175,7 @@ const VoiceGiftDetail = () => {
         audioId,
       };
 
-      if (audioBlob) {
-        const recordFile = new File([audioBlob], 'record', {
-          type: audioBlob.type,
-        });
-
+      if (recordFile) {
         const record = await uploadFile(recordFile);
         data.record = record;
       }
@@ -472,33 +452,37 @@ const VoiceGiftDetail = () => {
               </Box>
               <Box>
                 <Typography>Record your voice (30s maximum)</Typography>
-                <Box
-                  display={
-                    !recorderControls.isRecording && audioBlob
-                      ? 'none'
-                      : 'block'
-                  }
-                >
-                  <AudioRecorder
-                    onRecordingComplete={addAudioElement}
-                    recorderControls={recorderControls}
-                  />
-                </Box>
-                {!recorderControls.isRecording && audioBlob && (
-                  <Box display="flex" alignItems="center" gap={2}>
-                    <audio controls ref={recorderAudioRef}>
-                      <source src={URL.createObjectURL(audioBlob)} />
+                {!isRecording && recordFile ? (
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <audio controls>
+                      <source src={URL.createObjectURL(recordFile)} />
                     </audio>
                     <Button
                       size="small"
                       variant="contained"
                       color="error"
-                      onClick={() => setAudioBlob(null)}
+                      onClick={start}
                     >
                       <Typography fontSize="12px" textTransform="none">
-                        Remove
+                        Redo
                       </Typography>
                     </Button>
+                  </Box>
+                ) : (
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <RadioButtonCheckedIcon
+                      sx={{
+                        color: isRecording
+                          ? theme.palette.error.main
+                          : theme.palette.success.main,
+                        cursor: 'pointer',
+                        fontSize: 50,
+                      }}
+                      onClick={() => (isRecording ? stop() : start())}
+                    />
+                    <Typography>
+                      {`${100 + Math.min(recordingTime, 30)}`.slice(-2)}s
+                    </Typography>
                   </Box>
                 )}
               </Box>

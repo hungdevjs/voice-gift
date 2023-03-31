@@ -22,7 +22,7 @@ const create = functions.https.onCall(async (data, context) => {
     }
 
     if (record) {
-      const recordId = await filePathToTelegramFileId(record);
+      const recordId = await filePathToTelegramFileId(record, '.mp3');
 
       newVoiceGift.recordId = recordId;
     }

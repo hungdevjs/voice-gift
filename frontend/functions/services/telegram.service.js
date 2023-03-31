@@ -11,7 +11,8 @@ const uploadFile = async ({ buffer, fileName }) => {
     const res = await bot.sendDocument(TELEGRAM_CHAT_ID, buffer, {
       fileName,
     });
-    const fileId = res.document.file_id;
+    const fileId =
+      fileName.slice(-3) === 'mp3' ? res.audio.file_id : res.document.file_id;
 
     return fileId;
   } catch (err) {

@@ -19,9 +19,9 @@ const removeFile = async (path) => {
   }
 };
 
-const filePathToTelegramFileId = async (path) => {
+const filePathToTelegramFileId = async (path, type = '') => {
   const buffer = await getBufferFirebaseStorageFile(path);
-  const fileId = await uploadFile({ buffer, fileName: 'firebase-file' });
+  const fileId = await uploadFile({ buffer, fileName: `firebase-file${type}` });
   removeFile(path);
   return fileId;
 };
