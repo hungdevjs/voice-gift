@@ -1,0 +1,11 @@
+{
+  "name": "voicegift",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/hungdevjs/voice-gift.git",
+  "author": "<jack.nguyen@weareday.one>",
+  "license": "MIT",
+  "scripts": {
+    "dockerize": "docker-compose down && docker-compose up --build -d"
+  }
+}

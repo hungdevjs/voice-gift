@@ -16,6 +16,7 @@
     "nodemon": "^2.0.22"
   },
   "scripts": {
-    "start": "nodemon index"
+    "start": "nodemon index",
+    "start-production": "node index"
   }
 }
