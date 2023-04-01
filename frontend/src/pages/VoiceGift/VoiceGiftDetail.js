@@ -266,7 +266,7 @@ const VoiceGiftDetail = () => {
             <Typography align="center">Creating voice gift...</Typography>
             <Typography align="center">Please don't close browser.</Typography>
           </Box>
-          <CircularProgress color="primary" size={30} />
+          <CircularProgress size={30} sx={{ color: theme.colors.primary }} />
         </Box>
       </Dialog>
       <Container sx={{ mt: '50px' }}>

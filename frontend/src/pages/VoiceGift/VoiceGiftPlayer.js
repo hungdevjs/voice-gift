@@ -119,7 +119,7 @@ const VoiceGiftPlayer = () => {
         gap={2}
       >
         <Typography>Loading voice gift...</Typography>
-        <CircularProgress size={30} color="primary" />
+        <CircularProgress size={30} sx={{ color: theme.colors.primary }} />
       </Box>
     );
 
