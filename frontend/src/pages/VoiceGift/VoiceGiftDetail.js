@@ -132,7 +132,7 @@ const VoiceGiftDetail = () => {
 
       const audio = musics.find((item) => item.id === audioId);
       if (audio) {
-        previewAudioRef.current = new Audio(audio.url);
+        previewAudioRef.current = new Audio(audio.bgUrl || audio.url);
         previewAudioRef.current.volume = 0.1;
       }
 

@@ -67,7 +67,7 @@ const VoiceGiftPlayer = () => {
       }
 
       if (audio) {
-        audioRef.current = new Audio(audio.url);
+        audioRef.current = new Audio(audio.bgUrl || audio.url);
         audioRef.current.volume = 0.1;
       }
 
