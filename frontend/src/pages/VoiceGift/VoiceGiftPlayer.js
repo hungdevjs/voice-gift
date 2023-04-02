@@ -59,21 +59,21 @@ const VoiceGiftPlayer = () => {
     if (isPlaying) {
       if (audioRef.current) {
         audioRef.current.volume = 0.1;
-        audioRef.current.currentTime = 0;
         audioRef.current.play();
       }
 
       if (recordRef.current) {
-        recordRef.current.currentTime = 0;
         recordRef.current.play();
       }
     } else {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.currentTime = 0;
       }
 
       if (recordRef.current) {
         recordRef.current.pause();
+        recordRef.current.currentTime = 0;
       }
     }
   }, [isPlaying]);
@@ -161,7 +161,6 @@ const VoiceGiftPlayer = () => {
                 ref={audioRef}
                 preload="auto"
                 onEnded={() => {
-                  recordRef.current?.pause();
                   setIsPlaying(false);
                 }}
                 onCanPlayThrough={() =>
@@ -180,7 +179,6 @@ const VoiceGiftPlayer = () => {
                 ref={recordRef}
                 preload="auto"
                 onEnded={() => {
-                  audioRef.current?.pause();
                   setIsPlaying(false);
                 }}
                 onCanPlayThrough={() =>
