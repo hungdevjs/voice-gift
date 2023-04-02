@@ -62,6 +62,7 @@ const VoiceGiftDetail = () => {
   const background = backgroundId
     ? backgrounds.find((item) => item.id === backgroundId)
     : null;
+  const audio = musics.find((item) => item.id === audioId);
 
   useEffect(() => {
     const activeAudioItem = musics.find((item) => item.id === activeAudio.id);
@@ -117,53 +118,28 @@ const VoiceGiftDetail = () => {
   useEffect(() => {
     if (isPlayingPreview) {
       setActiveAudio({ id: null, isPlaying: false });
-      recorderAudioRef.current?.pause();
-      recorderAudioRef.current && (recorderAudioRef.current.currentTime = 0);
+      if (recorderAudioRef.current) {
+        recorderAudioRef.current.pause();
+        recorderAudioRef.current.currentTime = 0;
+      }
 
       if (previewAudioRef.current) {
-        previewAudioRef.current.pause();
-        previewAudioRef.current = null;
-      }
-
-      if (previewRecordRef.current) {
-        previewRecordRef.current.pause();
-        previewRecordRef.current = null;
-      }
-
-      const audio = musics.find((item) => item.id === audioId);
-      if (audio) {
-        previewAudioRef.current = new Audio(audio.bgUrl || audio.url);
         previewAudioRef.current.volume = 0.1;
-      }
-
-      if (recordFile) {
-        previewRecordRef.current = new Audio(URL.createObjectURL(recordFile));
-      }
-
-      if (previewAudioRef.current) {
+        previewAudioRef.current.currentTime = 0;
         previewAudioRef.current.play();
-        previewAudioRef.current.addEventListener('ended', () => {
-          previewRecordRef.current?.pause();
-          setIsPlayingPreview(false);
-        });
       }
 
       if (previewRecordRef.current) {
+        previewRecordRef.current.currentTime = 0;
         previewRecordRef.current.play();
-        previewRecordRef.current.addEventListener('ended', () => {
-          previewAudioRef.current?.pause();
-          setIsPlayingPreview(false);
-        });
       }
     } else {
       if (previewAudioRef.current) {
         previewAudioRef.current.pause();
-        previewAudioRef.current = null;
       }
 
       if (previewRecordRef.current) {
         previewRecordRef.current.pause();
-        previewRecordRef.current = null;
       }
     }
   }, [isPlayingPreview]);
@@ -211,6 +187,32 @@ const VoiceGiftDetail = () => {
         accept="image/*"
         onChange={handleInputChange}
       />
+      <Box display="none">
+        {audio && (
+          <audio
+            ref={previewAudioRef}
+            preload="auto"
+            onEnded={() => {
+              previewRecordRef.current?.pause();
+              setIsPlayingPreview(false);
+            }}
+          >
+            <source src={audio.bgUrl} alt="audio" />
+          </audio>
+        )}
+        {recordFile && (
+          <audio
+            ref={previewRecordRef}
+            preload="auto"
+            onEnded={() => {
+              previewAudioRef.current?.pause();
+              setIsPlayingPreview(false);
+            }}
+          >
+            <source src={URL.createObjectURL(recordFile)} alt="audio" />
+          </audio>
+        )}
+      </Box>
       <Box
         height="50px"
         px={2}
