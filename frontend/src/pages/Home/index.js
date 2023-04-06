@@ -1,9 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, useTheme } from '@mui/material';
 
+import useAppContext from '../../hooks/useAppContext';
+
 const Home = () => {
   const navigate = useNavigate();
   const { colors } = useTheme();
+  const {
+    accountState: { user },
+  } = useAppContext();
 
   return (
     <Box
@@ -33,27 +38,52 @@ const Home = () => {
             Voice Gift
           </Typography>
           <Typography fontWeight={400} align="center">
-            Start to create your voice gift for free!
+            Start to create your digital gifts for free!
           </Typography>
           <Typography fontWeight={400} align="center">
             Sharing this app with your friends is incredible support for us.
           </Typography>
         </Box>
         <Box
-          px={4}
-          py={1}
-          borderRadius={8}
-          bgcolor={colors.primary}
-          sx={{
-            cursor: 'pointer',
-            transition: 'all ease 0.3s',
-            '&:hover': { transform: 'scale(1.05)' },
-          }}
-          onClick={() => navigate('/voice-gifts/create')}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          gap={1.5}
         >
-          <Typography fontWeight={600} color="white">
-            Create gift
-          </Typography>
+          <Box
+            px={4}
+            py={1}
+            borderRadius={8}
+            bgcolor={colors.primary}
+            sx={{
+              cursor: 'pointer',
+              transition: 'all ease 0.3s',
+              '&:hover': { transform: 'scale(1.05)' },
+            }}
+            onClick={() => navigate('/voice-gifts/create')}
+          >
+            <Typography fontWeight={600} color="white">
+              Create gift
+            </Typography>
+          </Box>
+          {!user && (
+            <Box>
+              <Typography
+                fontSize="14px"
+                align="center"
+                color="#555"
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+                onClick={() => navigate('/login')}
+              >
+                Login/Create your premium account
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
       <Box display="flex" justifyContent="flex-end">
