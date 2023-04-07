@@ -30,7 +30,11 @@ const QRCode = () => {
           justifyContent="center"
           gap={2}
         >
-          <img src="/images/logo.png" alt="logo" />
+          <img
+            src="/images/logo.png"
+            alt="logo"
+            style={{ width: 60, aspectRatio: '1/1' }}
+          />
           <Typography>Scan this QR code to view your voice gift!</Typography>
           <Box p={2} id="qr-code-container">
             <ReactQRCode value={value} />

@@ -12,41 +12,25 @@ import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import { faker } from '@faker-js/faker';
 
 import { get } from '../../services/voiceGift.service';
-import useAppContext from '../../hooks/useAppContext';
 
 const VoiceGiftPlayer = () => {
   const theme = useTheme();
   const { id } = useParams();
-  const {
-    freeBackgroundState: { backgrounds },
-    freeMusicState: { musics },
-  } = useAppContext();
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState(null);
   const [loaded, setLoaded] = useState([]); // [avatar, background image, background audio, record audio]
 
-  const { name, title, text, audioId, backgroundId, avatar, record } =
-    data || {};
-  const background = backgroundId
-    ? backgrounds.find((item) => item.id === backgroundId)
-    : null;
-
-  const audio = audioId ? musics.find((item) => item.id === audioId) : null;
+  const { name, title, text, avatar, record, background, audio } = data || {};
 
   const togglePlaying = () => setIsPlaying(!isPlaying);
 
   const getData = async () => {
-    setIsLoading(true);
-
     try {
       const res = await get(id);
       setData(res.data);
     } catch (err) {
       console.error(err);
     }
-
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -80,7 +64,7 @@ const VoiceGiftPlayer = () => {
 
   useEffect(() => {
     if (data) {
-      if (!audioId) {
+      if (!audio) {
         setLoaded((prevLoaded) => {
           const nextLoaded = [...prevLoaded];
           nextLoaded[2] = true;
@@ -100,6 +84,7 @@ const VoiceGiftPlayer = () => {
 
   const interval = useRef();
   useEffect(() => {
+    let count = 0;
     interval.current = setInterval(() => {
       let audioDone = false;
       let recordDone = false;
@@ -120,7 +105,7 @@ const VoiceGiftPlayer = () => {
       if (audioDone && recordDone) {
         clearInterval(interval.current);
       }
-    }, 200);
+    }, 1000);
 
     return () => clearInterval(interval.current);
   }, []);
@@ -171,7 +156,7 @@ const VoiceGiftPlayer = () => {
                   })
                 }
               >
-                <source src={audio.bgUrl} alt="audio" />
+                <source src={audio} alt="audio" />
               </audio>
             )}
             {record && (
@@ -244,7 +229,7 @@ const VoiceGiftPlayer = () => {
                 }}
               >
                 <img
-                  src={background?.url}
+                  src={background}
                   alt="background"
                   onLoad={() =>
                     setLoaded((prevLoaded) => {

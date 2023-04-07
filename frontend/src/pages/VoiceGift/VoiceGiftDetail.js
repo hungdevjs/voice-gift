@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useId } from 'react';
+import { useState, useRef, useEffect, useId, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   alpha,
@@ -19,6 +19,7 @@ import StopCircleIcon from '@mui/icons-material/StopCircle';
 import CheckIcon from '@mui/icons-material/Check';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { useSnackbar } from 'notistack';
 
@@ -38,6 +39,7 @@ const VoiceGiftDetail = () => {
   const { isMobile } = useResponsive();
   const theme = useTheme();
   const {
+    accountState: { user },
     freeBackgroundState: { backgrounds },
     freeMusicState: { musics },
   } = useAppContext();
@@ -56,16 +58,45 @@ const VoiceGiftDetail = () => {
   });
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const inputId = useId();
-  const labelRef = useRef();
+  const [customBackground, setCustomBackground] = useState(null);
+  const [customAudio, setCustomAudio] = useState(null);
+  const avatarInputId = useId();
+  const customBackgroundInputId = useId();
+  const customAudioInputId = useRef();
+  const labelRef = useRef([]);
 
   const background = backgroundId
     ? backgrounds.find((item) => item.id === backgroundId)
     : null;
-  const audio = musics.find((item) => item.id === audioId);
+  const audio = useMemo(
+    () =>
+      audioId === 0
+        ? customAudio
+          ? { bgUrl: URL.createObjectURL(customAudio) }
+          : null
+        : musics.find((item) => item.id === audioId),
+    [customAudio, musics, audioId]
+  );
 
   useEffect(() => {
-    const activeAudioItem = musics.find((item) => item.id === activeAudio.id);
+    if (!customBackground) {
+      setBackgroundId('1');
+    }
+  }, [customBackground]);
+
+  useEffect(() => {
+    if (!customAudio) {
+      setAudioId('1');
+    }
+  }, [customAudio]);
+
+  useEffect(() => {
+    const activeAudioItem =
+      activeAudio.id === 0
+        ? customAudio
+          ? { url: URL.createObjectURL(customAudio) }
+          : null
+        : musics.find((item) => item.id === activeAudio.id);
     if (activeAudioItem) {
       if (activeAudio.isPlaying) {
         if (audioRef.current) {
@@ -93,11 +124,31 @@ const VoiceGiftDetail = () => {
     }
   }, [activeAudio]);
 
-  const handleInputChange = (e) => {
+  const handleAvatarInputChange = (e) => {
     try {
       const file = e.target.files[0];
       if (file.size > MAX_FILE_SIZE) throw new Error('Max file size is 5MB');
       setAvatar(file);
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: 'error' });
+    }
+    e.target.value = '';
+  };
+  const handleBackgroundInputChange = (e) => {
+    try {
+      const file = e.target.files[0];
+      if (file.size > MAX_FILE_SIZE) throw new Error('Max file size is 5MB');
+      setCustomBackground(file);
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: 'error' });
+    }
+    e.target.value = '';
+  };
+  const handleAudioInputChange = (e) => {
+    try {
+      const file = e.target.files[0];
+      if (file.size > MAX_FILE_SIZE) throw new Error('Max file size is 5MB');
+      setCustomAudio(file);
     } catch (err) {
       enqueueSnackbar(err.message, { variant: 'error' });
     }
@@ -124,6 +175,7 @@ const VoiceGiftDetail = () => {
       }
 
       if (previewAudioRef.current) {
+        console.log(previewAudioRef.current);
         previewAudioRef.current.volume = 0.1;
         previewAudioRef.current.currentTime = 0;
         previewAudioRef.current.play();
@@ -144,6 +196,13 @@ const VoiceGiftDetail = () => {
     }
   }, [isPlayingPreview]);
 
+  useEffect(() => {
+    if (audio) {
+      previewAudioRef.current?.load();
+      setIsPlayingPreview(false);
+    }
+  }, [audio]);
+
   const submit = async () => {
     setIsLoading(true);
     try {
@@ -158,6 +217,22 @@ const VoiceGiftDetail = () => {
         backgroundId,
         audioId,
       };
+
+      if (user) {
+        if (backgroundId === 0) {
+          if (!customBackground)
+            throw new Error('Error in uploading custom background: No file!');
+          const backgroundRef = await uploadFile(customBackground);
+          data.customBackground = backgroundRef;
+        }
+
+        if (audioId === 0) {
+          if (!customAudio)
+            throw new Error('Error in uploading custom audio: No file!');
+          const audioRef = await uploadFile(customAudio);
+          data.customAudio = audioRef;
+        }
+      }
 
       if (recordFile) {
         const record = await uploadFile(recordFile);
@@ -179,13 +254,41 @@ const VoiceGiftDetail = () => {
 
   return (
     <Box>
-      <label htmlFor={inputId} ref={labelRef} style={{ display: 'none' }} />
+      <label
+        htmlFor={avatarInputId}
+        ref={(node) => (labelRef.current[0] = node)}
+        style={{ display: 'none' }}
+      />
       <input
-        id={inputId}
+        id={avatarInputId}
         style={{ display: 'none' }}
         type="file"
         accept="image/*"
-        onChange={handleInputChange}
+        onChange={handleAvatarInputChange}
+      />
+      <label
+        htmlFor={customBackgroundInputId}
+        ref={(node) => (labelRef.current[1] = node)}
+        style={{ display: 'none' }}
+      />
+      <input
+        id={customBackgroundInputId}
+        style={{ display: 'none' }}
+        type="file"
+        accept="image/*"
+        onChange={handleBackgroundInputChange}
+      />
+      <label
+        htmlFor={customAudioInputId}
+        ref={(node) => (labelRef.current[2] = node)}
+        style={{ display: 'none' }}
+      />
+      <input
+        id={customAudioInputId}
+        style={{ display: 'none' }}
+        type="file"
+        accept="audio/*"
+        onChange={handleAudioInputChange}
       />
       <Box display="none">
         {audio && (
@@ -321,7 +424,7 @@ const VoiceGiftDetail = () => {
                       py={0.5}
                       bgcolor={alpha('#000', 0.5)}
                       sx={{ cursor: 'pointer' }}
-                      onClick={() => labelRef.current?.click()}
+                      onClick={() => labelRef.current[0]?.click()}
                     >
                       <Typography fontSize="12px" color="white" align="center">
                         Edit
@@ -366,6 +469,121 @@ const VoiceGiftDetail = () => {
                     overflowX: 'auto',
                   }}
                 >
+                  {user && (
+                    <>
+                      {customBackground ? (
+                        <Box
+                          flexShrink={0}
+                          position="relative"
+                          overflow="hidden"
+                          sx={{
+                            '&:hover > .overlay': {
+                              opacity: 1,
+                            },
+                          }}
+                        >
+                          <img
+                            src={URL.createObjectURL(customBackground)}
+                            alt="bg"
+                            style={{
+                              display: 'block',
+                              width: '200px',
+                              height: '100%',
+                              objectFit: 'cover',
+                              objectPosition: 'center',
+                              borderRadius: 16,
+                              border: `2px solid ${
+                                !backgroundId
+                                  ? theme.colors.primary
+                                  : 'transparent'
+                              }`,
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => setBackgroundId(0)}
+                          />
+                          <Box
+                            className="overlay"
+                            position="absolute"
+                            bottom={0}
+                            left={0}
+                            width="196px"
+                            px={2}
+                            py={1}
+                            m="2px"
+                            bgcolor={alpha('#000', 0.4)}
+                            border="2px solid transparent"
+                            boxSizing="padding-box"
+                            display="flex"
+                            alignItems="center"
+                            gap={2}
+                            sx={{
+                              borderBottomLeftRadius: '14px',
+                              borderBottomRightRadius: '14px',
+                              transition: 'all ease 0.5s',
+                              opacity: 0,
+                            }}
+                          >
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="primary"
+                              sx={{
+                                flex: 1,
+                                fontSize: '8px',
+                                textTransform: 'none',
+                                px: 0,
+                                py: 0.5,
+                              }}
+                              onClick={() => labelRef.current[1]?.click()}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="error"
+                              sx={{
+                                flex: 1,
+                                fontSize: '8px',
+                                textTransform: 'none',
+                                px: 0,
+                                py: 0.5,
+                              }}
+                              onClick={() => setCustomBackground(null)}
+                            >
+                              Remove
+                            </Button>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <Box
+                          flexShrink={0}
+                          width="200px"
+                          p={2}
+                          borderRadius={4}
+                          border="1px solid #ccc"
+                          display="flex"
+                          flexDirection="column"
+                          alignItems="center"
+                          justifyContent="center"
+                          gap={1}
+                          sx={{ cursor: 'pointer' }}
+                          onClick={() => labelRef.current[1]?.click()}
+                        >
+                          <CloudUploadIcon
+                            sx={{ color: '#888', fontSize: 40 }}
+                          />
+                          <Typography
+                            fontSize="14px"
+                            color="#888"
+                            align="center"
+                          >
+                            Upload your background
+                          </Typography>
+                        </Box>
+                      )}
+                    </>
+                  )}
                   {backgrounds.map((item, index) => (
                     <img
                       key={item.id}
@@ -408,6 +626,154 @@ const VoiceGiftDetail = () => {
                     overflowX: 'auto',
                   }}
                 >
+                  {user && (
+                    <>
+                      {customAudio ? (
+                        <Box
+                          flexShrink={0}
+                          width="200px"
+                          p={2}
+                          position="relative"
+                          overflow="hidden"
+                          display="flex"
+                          flexDirection="column"
+                          alignItems="center"
+                          gap={1}
+                          borderRadius={4}
+                          border={`2px solid ${
+                            audioId === 0 ? theme.colors.primary : '#ccc'
+                          }`}
+                          sx={{
+                            '&:hover > .overlay': {
+                              opacity: 1,
+                            },
+                          }}
+                          onClick={() => setAudioId(0)}
+                        >
+                          <Typography
+                            fontWeight={600}
+                            align="center"
+                            sx={{
+                              display: '-webkit-box',
+                              WebkitBoxOrient: 'vertical',
+                              WebkitLineClamp: 1,
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {customAudio.name}
+                          </Typography>
+                          <Typography fontWeight={600} align="center">
+                            ({customAudio.duration}s)
+                          </Typography>
+                          <Box display="flex" justifyContent="center">
+                            <Box
+                              sx={{ cursor: 'pointer' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveAudio({
+                                  id: 0,
+                                  isPlaying:
+                                    activeAudio.id === 0
+                                      ? !activeAudio.isPlaying
+                                      : true,
+                                });
+                              }}
+                            >
+                              {activeAudio.id === 0 && activeAudio.isPlaying ? (
+                                <StopCircleIcon />
+                              ) : (
+                                <PlayCircleIcon />
+                              )}
+                            </Box>
+                          </Box>
+                          <img
+                            src="/images/audio.jpg"
+                            alt="audio"
+                            style={{ width: '100%' }}
+                          />
+                          <Box
+                            className="overlay"
+                            position="absolute"
+                            bottom={0}
+                            left={0}
+                            width="196px"
+                            px={2}
+                            py={1}
+                            bgcolor={alpha('#000', 0.4)}
+                            border="2px solid transparent"
+                            boxSizing="padding-box"
+                            display="flex"
+                            alignItems="center"
+                            gap={2}
+                            sx={{
+                              borderBottomLeftRadius: '14px',
+                              borderBottomRightRadius: '14px',
+                              transition: 'all ease 0.5s',
+                              opacity: 0,
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="primary"
+                              sx={{
+                                flex: 1,
+                                fontSize: '8px',
+                                textTransform: 'none',
+                                px: 0,
+                                py: 0.5,
+                              }}
+                              onClick={() => labelRef.current[2]?.click()}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="error"
+                              sx={{
+                                flex: 1,
+                                fontSize: '8px',
+                                textTransform: 'none',
+                                px: 0,
+                                py: 0.5,
+                              }}
+                              onClick={() => setCustomAudio(null)}
+                            >
+                              Remove
+                            </Button>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <Box
+                          flexShrink={0}
+                          width="200px"
+                          p={2}
+                          borderRadius={4}
+                          border="1px solid #ccc"
+                          display="flex"
+                          flexDirection="column"
+                          alignItems="center"
+                          justifyContent="center"
+                          gap={1}
+                          sx={{ cursor: 'pointer' }}
+                          onClick={() => labelRef.current[2]?.click()}
+                        >
+                          <CloudUploadIcon
+                            sx={{ color: '#888', fontSize: 40 }}
+                          />
+                          <Typography
+                            fontSizt="14px"
+                            color="#888"
+                            align="center"
+                          >
+                            Upload your audio
+                          </Typography>
+                        </Box>
+                      )}
+                    </>
+                  )}
                   {musics.map((item) => (
                     <Box
                       key={item.id}
@@ -423,12 +789,16 @@ const VoiceGiftDetail = () => {
                       gap={1}
                       onClick={() => setAudioId(item.id)}
                     >
-                      <img
-                        src="/images/audio.jpg"
-                        alt="audio"
-                        style={{ width: '100%' }}
-                      />
-                      <Typography fontWeight={600} align="center">
+                      <Typography
+                        fontWeight={600}
+                        align="center"
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitBoxOrient: 'vertical',
+                          WebkitLineClamp: 1,
+                          overflow: 'hidden',
+                        }}
+                      >
                         {item.name}
                       </Typography>
                       <Typography fontWeight={600} align="center">
@@ -456,6 +826,11 @@ const VoiceGiftDetail = () => {
                           )}
                         </Box>
                       </Box>
+                      <img
+                        src="/images/audio.jpg"
+                        alt="audio"
+                        style={{ width: '100%' }}
+                      />
                     </Box>
                   ))}
                 </ScrollContainer>
@@ -547,7 +922,13 @@ const VoiceGiftDetail = () => {
                     </Box>
                     <Box borderRadius={4} overflow="hidden" position="relative">
                       <img
-                        src={background?.url}
+                        src={
+                          backgroundId === 0
+                            ? customBackground
+                              ? URL.createObjectURL(customBackground)
+                              : ''
+                            : background?.url
+                        }
                         alt="background"
                         style={{ display: 'block', width: '100%' }}
                       />
