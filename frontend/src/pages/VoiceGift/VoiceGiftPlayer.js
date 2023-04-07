@@ -84,7 +84,6 @@ const VoiceGiftPlayer = () => {
 
   const interval = useRef();
   useEffect(() => {
-    let count = 0;
     interval.current = setInterval(() => {
       let audioDone = false;
       let recordDone = false;
@@ -123,7 +122,6 @@ const VoiceGiftPlayer = () => {
       display="flex"
       flexDirection="column"
       alignItems="center"
-      justifyContent="center"
     >
       <Dialog open={!playerReady} fullScreen>
         <Box
@@ -178,7 +176,7 @@ const VoiceGiftPlayer = () => {
               </audio>
             )}
           </Box>
-          <Box py={4} px={2} maxWidth="400px">
+          <Box py={4} px={2} flex={1} maxWidth="400px">
             <Box display="flex" flexDirection="column" gap={2}>
               <Box display="flex" alignItems="center" gap={1}>
                 <img
@@ -287,7 +285,7 @@ const VoiceGiftPlayer = () => {
             >
               Create your voice gift back for them now!
             </Typography>
-            <img src="/images/logo.png" alt="logo" style={{ width: 30 }} />
+            {/* <img src="/images/logo.png" alt="logo" style={{ width: 30 }} /> */}
           </Box>
         </>
       )}

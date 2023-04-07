@@ -139,6 +139,7 @@ const VoiceGiftDetail = () => {
       const file = e.target.files[0];
       if (file.size > MAX_FILE_SIZE) throw new Error('Max file size is 5MB');
       setCustomBackground(file);
+      setBackgroundId(0);
     } catch (err) {
       enqueueSnackbar(err.message, { variant: 'error' });
     }
@@ -149,6 +150,7 @@ const VoiceGiftDetail = () => {
       const file = e.target.files[0];
       if (file.size > MAX_FILE_SIZE) throw new Error('Max file size is 5MB');
       setCustomAudio(file);
+      setAudioId(0);
     } catch (err) {
       enqueueSnackbar(err.message, { variant: 'error' });
     }
@@ -175,7 +177,6 @@ const VoiceGiftDetail = () => {
       }
 
       if (previewAudioRef.current) {
-        console.log(previewAudioRef.current);
         previewAudioRef.current.volume = 0.1;
         previewAudioRef.current.currentTime = 0;
         previewAudioRef.current.play();

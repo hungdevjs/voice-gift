@@ -54,7 +54,10 @@ const create = functions.https.onCall(async (data, context) => {
       }
 
       if (customAudio) {
-        const customAudioId = await filePathToTelegramFileId(customAudio);
+        const customAudioId = await filePathToTelegramFileId(
+          customAudio,
+          '.mp3'
+        );
         newVoiceGift.audioId = customAudioId;
       }
     }
